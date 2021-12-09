@@ -21,7 +21,7 @@ async function main() {
     );
     await storage.setItem('emails',[{email : 'email0@gmail.com'}]);
 
-    postNoticia(); postEmail(); getNoticia(); getNoticiaId();
+    postNoticia(); postEmail(); getNoticia(); getNoticiaId(); putNoticia();
 }
 
 async function postNoticia() {
@@ -85,6 +85,51 @@ async function getNoticiaId() {
         }
     
         res.send(noticia);
+    });
+}
+
+async function putNoticia() {
+    await app.put('/noticia/:geraID', async (req, res) => {
+        const geraID = parseInt(req.params.geraID);
+        if (isNaN(geraID)) {
+            res.status(500).send('Não é um inteiro válido.');
+            return;
+        }
+
+        await storage.init();
+
+        let noticias = await storage.getItem('noticias');
+        let emails = await storage.getItem('emails');
+        const noticia = noticias.find(n => n.ID === geraID);
+
+        if (!noticia) {
+            res.status(500).send('ID de notícia inválida.');
+            return;
+
+        } else {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                auth: {
+                    user: 'adrian.farrell32@ethereal.email',
+                    pass: 'kfZjVuCSQ9RfHrMFTC'
+                }
+            });
+            
+            emails.forEach(element => {
+                setTimeout(async () => {
+                    const disparoEmail = await transporter.sendMail({
+                        from: 'Adrian Farrell <adrian.farrell32@ethereal.email>',
+                        to: element.email,
+                        subject: noticia.titulo,
+                        text: noticia.resumo
+                    });
+        
+                    console.log('ID do email disparado: ', disparoEmail.messageId);   
+                }, 2000);
+            });
+        }
+        res.send(emails);
     });
 }
 
