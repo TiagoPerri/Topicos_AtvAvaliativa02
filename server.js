@@ -21,7 +21,7 @@ async function main() {
     );
     await storage.setItem('emails',[{email : 'email0@gmail.com'}]);
 
-    postNoticia(); getNoticia();
+    postNoticia(); postEmail(); getNoticia(); getNoticiaId();
 }
 
 async function postNoticia() {
@@ -43,6 +43,19 @@ async function postNoticia() {
     });
 }
 
+async function postEmail() {
+    await app.post('/inscricao', async(req, res) => {
+        const email = req.body;
+
+        await storage.init();
+        const emails = await storage.getItem('emails');
+        emails.push(email);
+        await storage.updateItem('emails',emails);
+
+        res.send('E-mail Adicionado.');
+    });
+}
+
 async function getNoticia() {
     await app.get('/noticia', async (req, res) => {
         await storage.init();
@@ -50,6 +63,28 @@ async function getNoticia() {
         let noticias = await storage.getItem('noticias');
 
         res.send(noticias);
+    });
+}
+
+async function getNoticiaId() {
+    await app.get('/noticia/:geraID', async (req, res) => {
+        const geraID = parseInt(req.params.geraID);
+        if (isNaN(geraID)) {
+            res.status(500).send('Não é um inteiro válido.');
+            return;
+        }
+
+        await storage.init();
+
+        let noticias = await storage.getItem('noticias');
+    
+        const noticia = noticias.find(n => n.ID === geraID);
+        if (!noticia) {
+            res.status(500).send('ID de notícia inválida.');
+            return;
+        }
+    
+        res.send(noticia);
     });
 }
 
