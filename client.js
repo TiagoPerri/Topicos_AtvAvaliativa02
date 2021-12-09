@@ -1,5 +1,12 @@
 const axios = require('axios').default;
 
+function putNoticia() {
+    return axios.put('http://localhost:3000/noticia/3')
+    .then((res) => {
+        console.log(res.data);
+    })
+}
+
 function postTodosEmail() {
     return axios.post('http://localhost:3000/inscricao', {email:'email1@teste.com'})
     .then((res) => {
@@ -31,6 +38,23 @@ function postTodosEmail() {
         putNoticia();
     })
 }
+
+function getNoticia() {
+    return axios.get('http://localhost:3000/noticia/3')
+        .then((response) => {
+            console.log(response.data);
+            postTodosEmail();
+        });
+} 
+
+
+function getTodasNoticias() {
+    return axios.get('http://localhost:3000/noticia')
+        .then((response) => {
+            console.log(response.data);
+            getNoticia();
+        });
+} 
 
 function postTodasNoticias() {
     return axios.post('http://localhost:3000/noticia', {
@@ -78,3 +102,5 @@ function postTodasNoticias() {
         console.log(err.response.data);
     });
 }
+
+postTodasNoticias();
